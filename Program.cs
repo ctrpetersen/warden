@@ -1,5 +1,9 @@
 ﻿using System;
+using System.Diagnostics;
+using System.Runtime.CompilerServices;
 using Terminal.Gui;
+using Warden.Applications;
+using Application = Terminal.Gui.Application;
 using Attribute = Terminal.Gui.Attribute;
 
 namespace Warden
@@ -8,7 +12,13 @@ namespace Warden
     {
         static void Main(string[] args)
         {
-            Application.Init();
+            var mantis = new Mantis();
+            mantis.NewOutput += a_Output;
+            mantis.StartApp();
+
+
+
+/*            Application.Init();
             var top = Application.Top;
 
             var win = new Window("Warden")
@@ -27,7 +37,16 @@ namespace Warden
             var debugText = new Label("test"){X = 0, Y = 0};
             win.Add(debugText);
 
-            Application.Run();
+            Application.Run();*/
+
+
+
+            Console.ReadKey();
+        }
+
+        private static void a_Output(object sender, DataReceivedEventArgs e)
+        {
+            Console.WriteLine(e.Data);
         }
     }
 }

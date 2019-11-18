@@ -14,10 +14,13 @@ namespace Warden.Applications
         public abstract bool ShouldPrint { get; set; }
 
         public virtual Process Process { get; set; }
-        public virtual StringBuilder OutputBuilder { get; set; }
+        public virtual List<string> OutputList { get; set; }
+        public event EventHandler<DataReceivedEventArgs> NewOutput;
 
         public virtual void StartApp()
         {
+            OutputList = new List<string>();
+
             var processStartInfo = new ProcessStartInfo
             {
                 CreateNoWindow = true,
@@ -28,22 +31,23 @@ namespace Warden.Applications
             };
 
             Process = new Process {StartInfo = processStartInfo, EnableRaisingEvents = true};
-            OutputBuilder = new StringBuilder();
 
             if (ShouldPrint)
             {
                 Process.OutputDataReceived += delegate(object sender, DataReceivedEventArgs e)
                 {
-                    OutputBuilder.Append(e.Data);
+                    OutputList.Add(e.Data);
+                    NewOutput?.Invoke(sender,e);
+                    OutputEvent(e);
                 };
+
                 Process.ErrorDataReceived += delegate(object sender, DataReceivedEventArgs e)
                 {
-                    OutputBuilder.Append(e.Data);
+                    OutputList.Add(e.Data);
+                    NewOutput?.Invoke(sender, e);
+                    OutputEvent(e);
                 };
             }
-
-            Process.OutputDataReceived += delegate (object sender, DataReceivedEventArgs e) { OutputEvent(e); };
-            Process.ErrorDataReceived += delegate (object sender, DataReceivedEventArgs e) { OutputEvent(e); };
 
             Process.Start();
             Process.BeginOutputReadLine();
@@ -52,11 +56,7 @@ namespace Warden.Applications
 
         public virtual void OutputEvent(DataReceivedEventArgs e)
         {
-            foreach (var error in ErrorList.Where(error => e.Data == error))
-            {
-                CloseApp();
-                StartApp();
-            }
+
         }
 
         public virtual void CloseApp()
@@ -66,10 +66,11 @@ namespace Warden.Applications
 
             if (ShouldPrint)
             {
-                OutputBuilder = new StringBuilder();
+                OutputList = new List<string>();
             }
 
             Process = null;
         }
+
     }
 }
