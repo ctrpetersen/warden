@@ -41,7 +41,7 @@ namespace Warden
 
 
 
-            Console.ReadKey();
+            Console.ReadLine();
         }
 
         private static void a_Output(object sender, DataReceivedEventArgs e)

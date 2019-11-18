@@ -56,15 +56,31 @@ namespace Warden.Applications
             Process.BeginErrorReadLine();
         }
 
-        public virtual void OutputEvent(DataReceivedEventArgs e)
+        public void OutputEvent(DataReceivedEventArgs e)
         {
-
+            if (e == null) return;
+            if (ErrorList.Count > 0 && ErrorList.Any(error => e.Data.Contains(error)))
+            {
+                CloseApp();
+                StartApp();
+            }
         }
 
-        public virtual void CloseApp()
+        public bool IsHealthy()
+        {
+            if (Process != null && !Process.HasExited)
+            {
+                return true;
+            }
+
+            return false;
+        }
+
+        public void CloseApp()
         {
             Process?.Kill();
             Process?.Close();
+            
 
             if (ShouldPrint)
             {
