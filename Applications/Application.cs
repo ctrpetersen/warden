@@ -9,6 +9,7 @@ namespace Warden.Applications
     public abstract class Application
     {
         public abstract string AppPath { get; }
+        public abstract string ExecutableName { get; }
         public abstract List<string> ErrorList { get; set; }
         public abstract int Timeout { get; set; }
         public abstract bool ShouldPrint { get; set; }
@@ -27,7 +28,8 @@ namespace Warden.Applications
                 RedirectStandardError = true,
                 RedirectStandardOutput = true,
                 UseShellExecute = false,
-                FileName = AppPath
+                FileName = AppPath + "\\" + ExecutableName,
+                WorkingDirectory = AppPath
             };
 
             Process = new Process {StartInfo = processStartInfo, EnableRaisingEvents = true};
