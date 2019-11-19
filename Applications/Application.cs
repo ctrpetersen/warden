@@ -20,7 +20,7 @@ namespace Warden.Applications
         public List<string> OutputList { get; set; }
         public event EventHandler<DataReceivedEventArgs> NewOutput;
 
-        private Timer _tickTimer = new Timer(1000);
+        private readonly Timer _tickTimer = new Timer(1000);
         private int _secondsSinceLastTick;
 
         public void StartApp()

@@ -13,12 +13,8 @@ namespace Warden
         static void Main(string[] args)
         {
             var mantis = new Mantis();
-            mantis.NewOutput += a_Output;
-            mantis.StartApp();
 
-
-
-/*            Application.Init();
+            Application.Init();
             var top = Application.Top;
 
             var win = new Window("Warden")
@@ -37,20 +33,16 @@ namespace Warden
             var debugText = new Label("test"){X = 0, Y = 0};
             win.Add(debugText);
 
-            Application.Run();*/
+            Application.Run();
 
-
-
-            Console.ReadLine();
-
-            Console.WriteLine(mantis.AppHealth());
-
-            Console.ReadLine();
+            mantis.NewOutput += MantisOutput;
+            mantis.StartApp();
         }
 
-        private static void a_Output(object sender, DataReceivedEventArgs e)
+        private static void MantisOutput(object sender, DataReceivedEventArgs e)
         {
             Console.WriteLine(e.Data);
+            
         }
     }
 }
