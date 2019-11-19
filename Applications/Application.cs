@@ -3,6 +3,8 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
 using System.Text;
+using System.Threading.Tasks;
+using System.Timers;
 
 namespace Warden.Applications
 {
@@ -11,16 +13,23 @@ namespace Warden.Applications
         public abstract string AppPath { get; }
         public abstract string ExecutableName { get; }
         public abstract List<string> ErrorList { get; set; }
-        public abstract int Timeout { get; set; }
+        public abstract int TimeoutSeconds { get; set; }
         public abstract bool ShouldPrint { get; set; }
 
-        public virtual Process Process { get; set; }
-        public virtual List<string> OutputList { get; set; }
+        public Process Process { get; set; }
+        public List<string> OutputList { get; set; }
         public event EventHandler<DataReceivedEventArgs> NewOutput;
 
-        public virtual void StartApp()
+        private Timer _tickTimer = new Timer(1000);
+        private int _secondsSinceLastTick;
+
+        public void StartApp()
         {
             OutputList = new List<string>();
+
+            _secondsSinceLastTick = 0;
+            _tickTimer.AutoReset = true;
+            _tickTimer.Elapsed += TickTimer;
 
             var processStartInfo = new ProcessStartInfo
             {
@@ -59,6 +68,8 @@ namespace Warden.Applications
         public void OutputEvent(DataReceivedEventArgs e)
         {
             if (e == null) return;
+            _secondsSinceLastTick = 0;
+
             if (ErrorList.Count > 0 && ErrorList.Any(error => e.Data.Contains(error)))
             {
                 CloseApp();
@@ -66,28 +77,29 @@ namespace Warden.Applications
             }
         }
 
-        public bool IsHealthy()
+        public ApplicationHealth AppHealth()
         {
-            if (Process != null && !Process.HasExited)
-            {
-                return true;
-            }
-
-            return false;
+            if (Process == null || Process.HasExited) return ApplicationHealth.Dead;
+            return _secondsSinceLastTick > (TimeoutSeconds / 2) ? ApplicationHealth.Delay : ApplicationHealth.Healthy;
         }
 
         public void CloseApp()
         {
             Process?.Kill();
             Process?.Close();
-            
-
-            if (ShouldPrint)
-            {
-                OutputList = new List<string>();
-            }
 
             Process = null;
+        }
+
+        private void TickTimer(object sender, ElapsedEventArgs e)
+        {
+            _secondsSinceLastTick++;
+
+            if (_secondsSinceLastTick >= TimeoutSeconds)
+            {
+                CloseApp();
+                StartApp();
+            }
         }
 
     }

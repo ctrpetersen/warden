@@ -42,6 +42,10 @@ namespace Warden
 
 
             Console.ReadLine();
+
+            Console.WriteLine(mantis.AppHealth());
+
+            Console.ReadLine();
         }
 
         private static void a_Output(object sender, DataReceivedEventArgs e)
