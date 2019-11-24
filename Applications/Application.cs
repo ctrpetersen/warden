@@ -36,7 +36,7 @@ namespace Warden.Applications
                 RedirectStandardError = true,
                 RedirectStandardOutput = true,
                 UseShellExecute = false,
-                FileName = AppPath + "\\" + ExecutableName,
+                FileName = AppPath + "\\" + ExecutableName + ".exe",
                 WorkingDirectory = AppPath
             };
 
@@ -64,7 +64,7 @@ namespace Warden.Applications
 
         public void OutputEvent(DataReceivedEventArgs e)
         {
-            if (e == null) return;
+            if (e == null || e.Data == null) return;
             SecondsSinceLastTick = 0;
             LatestOutput = e.Data;
 
@@ -85,7 +85,8 @@ namespace Warden.Applications
         public void CloseApp()
         {
             Process?.Kill();
-            Process?.Close();
+            Process?.WaitForExit();
+            Process?.Dispose();
 
             LatestOutput = "";
             SecondsSinceLastTick = 0;

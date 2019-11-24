@@ -5,7 +5,7 @@
         static void Main(string[] args)
         {
             var warden = new Warden();
-            warden.Start();
+            warden.PreInit();;
         }
     }
 }

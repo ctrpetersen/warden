@@ -11,18 +11,51 @@ namespace Warden
         private List<Application> _trackedApps = new List<Application>();
         private readonly Timer _refreshTimer = new Timer(TimeSpan.FromSeconds(1).TotalMilliseconds);
 
-        public void Start()
+        //should be ran after pre init
+        private void Start()
         {
             _refreshTimer.AutoReset = true;
             _refreshTimer.Elapsed += AutoRefreshScreen;
             _refreshTimer.Start();
 
-            _trackedApps = ApplicationLoader.GetApplications("json.txt");
-
-
+            
             StartAll();
 
             Console.ReadLine();
+        }
+
+        //check for leftover processes that were not closed correctly
+        public void PreInit()
+        {
+            _trackedApps = ApplicationLoader.GetApplications("json.txt");
+
+            Console.WriteLine($"Checking {_trackedApps.Count} apps for leftover processes...");
+
+            foreach (var trackedApp in _trackedApps)
+            {
+                var leftoverProcs = Process.GetProcessesByName(trackedApp.ExecutableName);
+
+                if (leftoverProcs.Length > 0)
+                {
+                    Console.WriteLine($"Found {leftoverProcs.Length} leftover process(es) of {trackedApp.ExecutableName}. Closing...");
+
+                    foreach (var leftoverProc in leftoverProcs)
+                    {
+                        leftoverProc.Kill();
+                        leftoverProc.WaitForExit();
+                        leftoverProc.Dispose();
+                    }
+                }
+                else
+                {
+                    Console.WriteLine($"Found no leftover processes of {trackedApp.ExecutableName}.");
+                }
+            }
+
+            Console.WriteLine("Pre-init finished. Press enter to start.");
+
+            Console.ReadLine();
+            Start();
         }
 
         private void RefreshScreen(object sender, DataReceivedEventArgs e)
