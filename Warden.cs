@@ -63,6 +63,11 @@ namespace Warden
             Console.Clear();
             foreach (var app in _trackedApps)
             {
+                if (app.Process.HasExited) //TODO -- this should never be valid
+                {
+                    Console.WriteLine("!!!APP WITH CLOSED PROCESS!!!");
+                }
+
                 Console.ForegroundColor = ConsoleColor.DarkGreen;
                 Console.WriteLine($"{app.Process.ProcessName, 8}  |  {app.AppHealth(), 8}  |  {app.SecondsSinceLastTick} seconds since last tick  |  {MemInMb(app.Process.WorkingSet64)} mb");
 
