@@ -1,10 +1,9 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Diagnostics;
 using System.Runtime.CompilerServices;
-using Terminal.Gui;
 using Warden.Applications;
-using Application = Terminal.Gui.Application;
-using Attribute = Terminal.Gui.Attribute;
+
 
 namespace Warden
 {
@@ -12,37 +11,8 @@ namespace Warden
     {
         static void Main(string[] args)
         {
-            var mantis = new Mantis();
-
-            Application.Init();
-            var top = Application.Top;
-
-            var win = new Window("Warden")
-            {
-                X = 0,
-                Y = 0,
-
-                Width = Dim.Fill(),
-                Height = Dim.Fill()
-            };
-
-            win.ColorScheme.Normal = Attribute.Make(Color.BrightGreen, Color.Black);
-
-            top.Add(win);
-
-            var debugText = new Label("test"){X = 0, Y = 0};
-            win.Add(debugText);
-
-            Application.Run();
-
-            mantis.NewOutput += MantisOutput;
-            mantis.StartApp();
-        }
-
-        private static void MantisOutput(object sender, DataReceivedEventArgs e)
-        {
-            Console.WriteLine(e.Data);
-            
+            var warden = new Warden();
+            warden.Start();
         }
     }
 }
