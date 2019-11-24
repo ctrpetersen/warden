@@ -3,7 +3,7 @@
     public enum ApplicationHealth
     {
         Healthy,
-        Delay,
+        Slow,
         Dead
     }
 }

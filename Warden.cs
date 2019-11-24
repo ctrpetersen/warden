@@ -9,7 +9,7 @@ namespace Warden
     class Warden
     {
         private List<Application> _trackedApps = new List<Application>();
-        private readonly Timer _refreshTimer = new Timer(TimeSpan.FromSeconds(5).TotalMilliseconds);
+        private readonly Timer _refreshTimer = new Timer(TimeSpan.FromSeconds(1).TotalMilliseconds);
 
         public void Start()
         {
@@ -19,10 +19,6 @@ namespace Warden
 
             _trackedApps = ApplicationLoader.GetApplications("json.txt");
 
-            foreach (var app in _trackedApps)
-            {
-                app.NewOutput += RefreshScreen;
-            }
 
             StartAll();
 

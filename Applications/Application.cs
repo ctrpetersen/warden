@@ -79,7 +79,7 @@ namespace Warden.Applications
         public ApplicationHealth AppHealth()
         {
             if (Process == null || Process.HasExited) return ApplicationHealth.Dead;
-            return SecondsSinceLastTick > (TimeoutSeconds / 2) ? ApplicationHealth.Delay : ApplicationHealth.Healthy;
+            return SecondsSinceLastTick > (TimeoutSeconds / 2) ? ApplicationHealth.Slow : ApplicationHealth.Healthy;
         }
 
         public void CloseApp()
