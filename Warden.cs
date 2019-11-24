@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Text;
+using System.Timers;
 using Warden.Applications;
 
 namespace Warden
@@ -9,9 +10,14 @@ namespace Warden
     class Warden
     {
         private static readonly List<Application> TrackedApps = new List<Application>();
+        private readonly Timer _refreshTimer = new Timer(TimeSpan.FromSeconds(5).TotalMilliseconds);
 
         public void Start()
         {
+            _refreshTimer.AutoReset = true;
+            _refreshTimer.Elapsed += AutoRefreshScreen;
+            _refreshTimer.Start();
+
             var mantis = new Mantis();
             mantis.NewOutput += RefreshScreen;
 
@@ -28,14 +34,19 @@ namespace Warden
             foreach (var app in TrackedApps)
             {
                 Console.ForegroundColor = ConsoleColor.DarkGreen;
-                Console.WriteLine($"{app.Process.ProcessName} HEALTH: {app.AppHealth()} {app.SecondsSinceLastTick} seconds since tick");
-                Console.ResetColor();
-                Console.WriteLine(app.LatestOutput);
-                Console.WriteLine();
+                Console.WriteLine($"{app.Process.ProcessName, 8}  |  {app.AppHealth(), 8}  |  {app.SecondsSinceLastTick} seconds since last tick  |  {MemInMb(app.Process.WorkingSet64)} mb");
+
+                Console.ForegroundColor = ConsoleColor.White;
+                Console.WriteLine(app.LatestOutput + "\n");
             }
         }
 
-        private void StartAll()
+        private void AutoRefreshScreen(object sender, ElapsedEventArgs e)
+        {
+            RefreshScreen(sender, null);
+        }
+
+        private static void StartAll()
         {
             foreach (var app in TrackedApps)
             {
@@ -43,12 +54,18 @@ namespace Warden
             }
         }
 
-        private void CloseAll()
+        private static void CloseAll()
         {
             foreach (var app in TrackedApps)
             {
                 app.CloseApp();
             }
+        }
+
+        public static string MemInMb(long mem)
+        {
+            var mb = mem / 1e+6;
+            return mb.ToString("#.#");
         }
     }
 }

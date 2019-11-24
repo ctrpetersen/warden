@@ -28,6 +28,7 @@ namespace Warden.Applications
             SecondsSinceLastTick = 0;
             _tickTimer.AutoReset = true;
             _tickTimer.Elapsed += TickTimer;
+            _tickTimer.Start();
 
             var processStartInfo = new ProcessStartInfo
             {
@@ -85,6 +86,8 @@ namespace Warden.Applications
             Process?.Kill();
             Process?.Close();
 
+            LatestOutput = "";
+            SecondsSinceLastTick = 0;
             Process = null;
         }
 
