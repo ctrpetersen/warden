@@ -1,11 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Diagnostics;
-using System.Runtime.CompilerServices;
-using Warden.Applications;
-
-
-namespace Warden
+﻿namespace Warden
 {
     class Program
     {

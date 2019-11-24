@@ -1,7 +1,5 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.IO;
-using System.Text;
 using Newtonsoft.Json;
 using Warden.Applications;
 
@@ -11,13 +9,13 @@ namespace Warden
     {
         public static void SaveApplications(List<Application> apps, string path)
         {
-            string json = JsonConvert.SerializeObject(apps);
+            var json = JsonConvert.SerializeObject(apps);
             File.WriteAllText(path, json);
         }
 
         public static List<Application> GetApplications(string path)
         {
-            string json = File.ReadAllText(path);
+            var json = File.ReadAllText(path);
             return JsonConvert.DeserializeObject<List<Application>>(json);
         }
     }

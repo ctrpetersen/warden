@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Diagnostics;
-using System.Text;
 using System.Timers;
 using Warden.Applications;
 
@@ -9,7 +8,7 @@ namespace Warden
 {
     class Warden
     {
-        private List<Application> TrackedApps = new List<Application>();
+        private List<Application> _trackedApps = new List<Application>();
         private readonly Timer _refreshTimer = new Timer(TimeSpan.FromSeconds(5).TotalMilliseconds);
 
         public void Start()
@@ -18,7 +17,12 @@ namespace Warden
             _refreshTimer.Elapsed += AutoRefreshScreen;
             _refreshTimer.Start();
 
-            TrackedApps = ApplicationLoader.GetApplications("json.txt");
+            _trackedApps = ApplicationLoader.GetApplications("json.txt");
+
+            foreach (var app in _trackedApps)
+            {
+                app.NewOutput += RefreshScreen;
+            }
 
             StartAll();
 
@@ -28,7 +32,7 @@ namespace Warden
         private void RefreshScreen(object sender, DataReceivedEventArgs e)
         {
             Console.Clear();
-            foreach (var app in TrackedApps)
+            foreach (var app in _trackedApps)
             {
                 Console.ForegroundColor = ConsoleColor.DarkGreen;
                 Console.WriteLine($"{app.Process.ProcessName, 8}  |  {app.AppHealth(), 8}  |  {app.SecondsSinceLastTick} seconds since last tick  |  {MemInMb(app.Process.WorkingSet64)} mb");
@@ -45,7 +49,7 @@ namespace Warden
 
         private void StartAll()
         {
-            foreach (var app in TrackedApps)
+            foreach (var app in _trackedApps)
             {
                 app.StartApp();
             }
@@ -53,7 +57,7 @@ namespace Warden
 
         private void CloseAll()
         {
-            foreach (var app in TrackedApps)
+            foreach (var app in _trackedApps)
             {
                 app.CloseApp();
             }
