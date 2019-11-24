@@ -8,13 +8,13 @@ using System.Timers;
 
 namespace Warden.Applications
 {
-    public abstract class Application
+    public class Application
     {
-        public abstract string AppPath { get; }
-        public abstract string ExecutableName { get; }
-        public abstract List<string> ErrorList { get; set; }
-        public abstract int TimeoutSeconds { get; set; }
-        public abstract bool ShouldPrint { get; set; }
+        public string AppPath { get; set; }
+        public string ExecutableName { get; set; }
+        public List<string> ErrorList { get; set; }
+        public int TimeoutSeconds { get; set; }
+        public bool ShouldPrint { get; set; }
 
         public Process Process { get; set; }
         public event EventHandler<DataReceivedEventArgs> NewOutput;
@@ -68,6 +68,7 @@ namespace Warden.Applications
             SecondsSinceLastTick = 0;
             LatestOutput = e.Data;
 
+            if (ErrorList == null) return;
             if (ErrorList.Count > 0 && ErrorList.Any(error => e.Data.Contains(error)))
             {
                 CloseApp();

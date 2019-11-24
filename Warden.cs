@@ -9,7 +9,7 @@ namespace Warden
 {
     class Warden
     {
-        private static readonly List<Application> TrackedApps = new List<Application>();
+        private List<Application> TrackedApps = new List<Application>();
         private readonly Timer _refreshTimer = new Timer(TimeSpan.FromSeconds(5).TotalMilliseconds);
 
         public void Start()
@@ -18,10 +18,7 @@ namespace Warden
             _refreshTimer.Elapsed += AutoRefreshScreen;
             _refreshTimer.Start();
 
-            var mantis = new Mantis();
-            mantis.NewOutput += RefreshScreen;
-
-            TrackedApps.Add(mantis);
+            TrackedApps = ApplicationLoader.GetApplications("json.txt");
 
             StartAll();
 
@@ -46,7 +43,7 @@ namespace Warden
             RefreshScreen(sender, null);
         }
 
-        private static void StartAll()
+        private void StartAll()
         {
             foreach (var app in TrackedApps)
             {
@@ -54,7 +51,7 @@ namespace Warden
             }
         }
 
-        private static void CloseAll()
+        private void CloseAll()
         {
             foreach (var app in TrackedApps)
             {
