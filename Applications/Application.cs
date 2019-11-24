@@ -17,17 +17,15 @@ namespace Warden.Applications
         public abstract bool ShouldPrint { get; set; }
 
         public Process Process { get; set; }
-        public List<string> OutputList { get; set; }
         public event EventHandler<DataReceivedEventArgs> NewOutput;
+        public string LatestOutput;
 
         private readonly Timer _tickTimer = new Timer(1000);
-        private int _secondsSinceLastTick;
+        public int SecondsSinceLastTick;
 
         public void StartApp()
         {
-            OutputList = new List<string>();
-
-            _secondsSinceLastTick = 0;
+            SecondsSinceLastTick = 0;
             _tickTimer.AutoReset = true;
             _tickTimer.Elapsed += TickTimer;
 
@@ -47,14 +45,12 @@ namespace Warden.Applications
             {
                 Process.OutputDataReceived += delegate(object sender, DataReceivedEventArgs e)
                 {
-                    OutputList.Add(e.Data);
                     NewOutput?.Invoke(sender,e);
                     OutputEvent(e);
                 };
 
                 Process.ErrorDataReceived += delegate(object sender, DataReceivedEventArgs e)
                 {
-                    OutputList.Add(e.Data);
                     NewOutput?.Invoke(sender, e);
                     OutputEvent(e);
                 };
@@ -68,7 +64,8 @@ namespace Warden.Applications
         public void OutputEvent(DataReceivedEventArgs e)
         {
             if (e == null) return;
-            _secondsSinceLastTick = 0;
+            SecondsSinceLastTick = 0;
+            LatestOutput = e.Data;
 
             if (ErrorList.Count > 0 && ErrorList.Any(error => e.Data.Contains(error)))
             {
@@ -80,7 +77,7 @@ namespace Warden.Applications
         public ApplicationHealth AppHealth()
         {
             if (Process == null || Process.HasExited) return ApplicationHealth.Dead;
-            return _secondsSinceLastTick > (TimeoutSeconds / 2) ? ApplicationHealth.Delay : ApplicationHealth.Healthy;
+            return SecondsSinceLastTick > (TimeoutSeconds / 2) ? ApplicationHealth.Delay : ApplicationHealth.Healthy;
         }
 
         public void CloseApp()
@@ -93,9 +90,9 @@ namespace Warden.Applications
 
         private void TickTimer(object sender, ElapsedEventArgs e)
         {
-            _secondsSinceLastTick++;
+            SecondsSinceLastTick++;
 
-            if (_secondsSinceLastTick >= TimeoutSeconds)
+            if (SecondsSinceLastTick >= TimeoutSeconds)
             {
                 CloseApp();
                 StartApp();
